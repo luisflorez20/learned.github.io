@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificados de cursos - GEG CORPORATION</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Fonts: Roboto & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- QRCode.js library for on-the-fly QR generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8fafc;
+      color: #374151;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .main-title {
+      font-family: 'Montserrat', 'Roboto', sans-serif;
+      color: #2c3e50;
+    }
+
+    /* Exact border styling from the original screenshot */
+    .card-border-green {
+      border: 1px solid #d9dfe7;
+      border-left: 5px solid #16a34a;
+      border-radius: 8px;
+    }
+
+    .card-border-blue {
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #3b82f6;
+      border-radius: 8px;
+    }
+
+    .cert-card {
+      border: 1.5px solid #f59e0b;
+      border-radius: 8px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .cert-card:hover {
+      box-shadow: 0 8px 20px -3px rgba(245, 158, 11, 0.18);
+    }
+
+    /* Print styles for verification & PDF export */
+    @media print {
+      header, .search-section, footer, .no-print {
+        display: none !important;
+      }
+      body {
+        background-color: #ffffff;
+      }
+      .card-border-blue {
+        border-left: 5px solid #3b82f6 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .cert-card {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#fbfbfb]">
+
+  <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo / Brand Title -->
+        <div class="flex items-center space-x-2">
+          <span class="text-xl sm:text-2xl font-black tracking-tight text-[#475569] select-none uppercase">
+            GEG CORPORATION
+          </span>
+        </div>
+
+        <!-- Desktop Navigation Items -->
+        <nav class="hidden lg:flex items-center space-x-7">
+          <a href="#" class="flex flex-col items-center text-xs font-semibold text-gray-700 hover:text-emerald-700 transition">
+            <i class="fa-solid fa-house text-base mb-1"></i>
+            <span>INICIO</span>
+          </a>
+
+          <a href="#" class="flex flex-col items-center text-xs font-semibold text-gray-700 hover:text-emerald-700 transition">
+            <i class="fa-solid fa-graduation-cap text-base mb-1"></i>
+            <span>CURSOS</span>
+          </a>
+
+          <a href="#" class="flex flex-col items-center text-xs font-semibold text-gray-800 hover:text-emerald-700 transition">
+            <div class="flex items-center space-x-1 mb-1">
+              <i class="fa-solid fa-magnifying-glass text-base"></i>
+              <span class="text-[11px] tracking-wider uppercase">CONSULTA CERTIFICADOS</span>
+            </div>
+            <i class="fa-solid fa-caret-down text-xs text-gray-600"></i>
+          </a>
+
+          <a href="#" class="flex flex-col items-center text-xs font-semibold text-gray-700 hover:text-emerald-700 transition">
+            <i class="fa-regular fa-calendar-days text-base mb-1"></i>
+            <span>EVENTOS</span>
+          </a>
+
+          <a href="#" class="flex flex-col items-center text-xs font-semibold text-gray-700 hover:text-emerald-700 transition">
+            <i class="fa-solid fa-briefcase text-base mb-1"></i>
+            <span>OFERTA LABORAL</span>
+          </a>
+        </nav>
+
+        <!-- Right Side: QR modal button & Login button -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- Button to trigger interactive QR modal -->
+          <button 
+            type="button" 
+            onclick="openQrModal()" 
+            title="Ver código QR para escanear"
+            class="hidden sm:inline-flex items-center px-3.5 py-2 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition">
+            <i class="fa-solid fa-qrcode text-base mr-1.5 text-gray-600"></i>
+            VER QR
+          </button>
+
+          <!-- Ingresar Button with fingerprint icon -->
+          <button 
+            type="button" 
+            class="inline-flex items-center px-6 py-2.5 bg-[#17873b] hover:bg-[#137131] text-white text-sm font-semibold rounded-full shadow-sm transition transform active:scale-95 focus:outline-none">
+            <i class="fa-solid fa-fingerprint text-base mr-2"></i>
+            INGRESAR
+          </button>
+
+          <!-- Mobile Hamburger Toggle -->
+          <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none" aria-label="Abrir menú">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-white border-t border-gray-200 px-4 py-3 space-y-2">
+      <a href="#" class="flex items-center space-x-3 text-sm font-medium text-gray-700 py-2 hover:text-emerald-700">
+        <i class="fa-solid fa-house w-6 text-center"></i>
+        <span>INICIO</span>
+      </a>
+      <a href="#" class="flex items-center space-x-3 text-sm font-medium text-gray-700 py-2 hover:text-emerald-700">
+        <i class="fa-solid fa-graduation-cap w-6 text-center"></i>
+        <span>CURSOS</span>
+      </a>
+      <a href="#" class="flex items-center space-x-3 text-sm font-medium text-gray-700 py-2 hover:text-emerald-700">
+        <i class="fa-solid fa-magnifying-glass w-6 text-center"></i>
+        <span>CONSULTA CERTIFICADOS</span>
+      </a>
+      <a href="#" class="flex items-center space-x-3 text-sm font-medium text-gray-700 py-2 hover:text-emerald-700">
+        <i class="fa-regular fa-calendar-days w-6 text-center"></i>
+        <span>EVENTOS</span>
+      </a>
+      <a href="#" class="flex items-center space-x-3 text-sm font-medium text-gray-700 py-2 hover:text-emerald-700">
+        <i class="fa-solid fa-briefcase w-6 text-center"></i>
+        <span>OFERTA LABORAL</span>
+      </a>
+      <button onclick="openQrModal()" class="w-full flex items-center space-x-3 text-sm font-medium text-emerald-700 py-2">
+        <i class="fa-solid fa-qrcode w-6 text-center"></i>
+        <span>VER CÓDIGO QR</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    
+    <!-- Page Main Header -->
+    <h1 class="main-title text-3xl sm:text-4xl font-extrabold text-center tracking-tight mb-8">
+      Certificados de cursos
+    </h1>
+
+    <!-- Search Box Card (Green left border) -->
+    <section class="search-section bg-white card-border-green p-6 sm:p-7 mb-10 shadow-sm">
+      <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-2">
+        Ingrese los datos para a consulta
+      </h2>
+      <p class="text-sm sm:text-base text-gray-600 mb-4 font-normal">
+        Ingrese su DNI o número de celular:
+      </p>
+
+      <form id="searchForm" onsubmit="event.preventDefault(); handleSearch();" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <!-- Input field with embedded magnifier -->
+        <div class="relative flex-grow flex items-center">
+          <input 
+            type="text" 
+            id="docInput" 
+            value="46204949" 
+            placeholder="Ingrese DNI o celular"
+            class="w-full h-11 px-3.5 pr-10 border border-gray-300 rounded-l-md sm:rounded-r-none rounded-r-md sm:border-r-0 focus:outline-none focus:ring-1 focus:ring-green-500 text-gray-800 font-medium text-sm sm:text-base shadow-inner"
+          />
+          <div class="hidden sm:flex items-center justify-center h-11 px-3.5 border border-l-0 border-gray-300 rounded-r-md bg-white text-gray-500">
+            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+          </div>
+        </div>
+
+        <!-- Green Action Button -->
+        <button 
+          type="submit" 
+          class="h-11 px-6 bg-[#329649] hover:bg-[#28813d] active:bg-[#226f34] text-white font-semibold text-sm rounded-md sm:rounded flex items-center justify-center space-x-2 transition shadow-sm uppercase tracking-wide">
+          <i class="fa-solid fa-magnifying-glass text-sm"></i>
+          <span>CONSULTAR</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Subtitle for Query Results -->
+    <h2 class="main-title text-2xl sm:text-3xl font-extrabold text-center tracking-tight mb-8">
+      Resultados de consulta
+    </h2>
+
+    <!-- Query Results Box (Blue left border) -->
+    <section id="resultsSection" class="bg-white card-border-blue p-6 sm:p-8 shadow-sm transition-opacity duration-200">
+      
+      <!-- Top Section: User Info Header -->
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-2">
+        <div class="flex items-center space-x-2.5 text-gray-800 font-bold text-lg sm:text-xl">
+          <i class="fa-solid fa-user text-gray-700"></i>
+          <span>Información de Usuario</span>
+        </div>
+        
+        <!-- Action utilities (Print & QR quick link) -->
+        <div class="no-print flex items-center space-x-2">
+          <button 
+            type="button" 
+            onclick="window.print()" 
+            class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded transition"
+            title="Imprimir o exportar PDF">
+            <i class="fa-solid fa-print mr-1.5"></i> Imprimir
+          </button>
+          <button 
+            type="button" 
+            onclick="openQrModal()" 
+            class="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded transition"
+            title="Generar QR para celular">
+            <i class="fa-solid fa-qrcode mr-1.5"></i> QR
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Column User Details Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-gray-200">
+        <div>
+          <p class="text-sm sm:text-base font-bold text-gray-800 mb-1">Nombres:</p>
+          <p id="userNameDisplay" class="text-sm sm:text-base text-gray-600 uppercase font-medium tracking-wide">
+            LUIS MIGUEL FLORES GUILLEN
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm sm:text-base font-bold text-gray-800 mb-1">Documento de identidad:</p>
+          <p id="userDocDisplay" class="text-sm sm:text-base text-gray-600 font-medium">
+            46204949
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm sm:text-base font-bold text-gray-800 mb-1">Pais:</p>
+          <p id="userCountryDisplay" class="text-sm sm:text-base text-gray-600 font-medium">
+            Perú - LIMA - LIMA
+          </p>
+        </div>
+      </div>
+
+      <!-- Certificates Heading -->
+      <div class="flex items-center space-x-2.5 text-gray-800 font-bold text-lg sm:text-xl mt-8 mb-6">
+        <i class="fa-solid fa-graduation-cap text-gray-700"></i>
+        <span>Certificados de cursos de usuario</span>
+      </div>
+
+      <!-- 2-Column Responsive Grid containing all 6 Certificates -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- CERTIFICADO 1 -->
+        <article class="cert-card bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <p class="text-base font-bold text-gray-800 leading-snug">Curso:</p>
+              <p class="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mt-1">
+                ESPECIALISTA EN ENSAMBLAJE Y MANT. Y REP. DE LAPTOPS
+              </p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Fecha de Obtención del Certificado:</p>
+              <p class="text-sm text-gray-600 mt-0.5">03/07/2023</p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Código autorizado por MINEDU :</p>
+              <p class="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight mt-1">
+                C001-048810
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- CERTIFICADO 2 -->
+        <article class="cert-card bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <p class="text-base font-bold text-gray-800 leading-snug">Curso:</p>
+              <p class="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mt-1">
+                ESPECIALISTA EN ENSAMBLAJE, MANT. Y REP. DE COMPUTADORAS
+              </p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Fecha de Obtención del Certificado:</p>
+              <p class="text-sm text-gray-600 mt-0.5">24/07/2023</p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Código autorizado por MINEDU :</p>
+              <p class="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight mt-1">
+                C001-048811
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- CERTIFICADO 3 -->
+        <article class="cert-card bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <p class="text-base font-bold text-gray-800 leading-snug">Curso:</p>
+              <p class="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mt-1">
+                ESPECIALISTA EN ADMINISTRACION DE REDES
+              </p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Fecha de Obtención del Certificado:</p>
+              <p class="text-sm text-gray-600 mt-0.5">14/08/2023</p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Código autorizado por MINEDU :</p>
+              <p class="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight mt-1">
+                C001-048812
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- CERTIFICADO 4 -->
+        <article class="cert-card bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <p class="text-base font-bold text-gray-800 leading-snug">Curso:</p>
+              <p class="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mt-1">
+                ADMINISTRADOR DE SERVIDORES WINDOWS Y LINUX
+              </p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Fecha de Obtención del Certificado:</p>
+              <p class="text-sm text-gray-600 mt-0.5">11/09/2023</p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Código autorizado por MINEDU :</p>
+              <p class="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight mt-1">
+                C001-048813
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- CERTIFICADO 5 -->
+        <article class="cert-card bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <p class="text-base font-bold text-gray-800 leading-snug">Curso:</p>
+              <p class="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mt-1">
+                ESPECIALISTA EN REPARACION DE CELULARES Y TABLET'S
+              </p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Fecha de Obtención del Certificado:</p>
+              <p class="text-sm text-gray-600 mt-0.5">16/10/2023</p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Código autorizado por MINEDU :</p>
+              <p class="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight mt-1">
+                C001-048814
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- CERTIFICADO 6 -->
+        <article class="cert-card bg-white p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <p class="text-base font-bold text-gray-800 leading-snug">Curso:</p>
+              <p class="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mt-1">
+                ESPECIALISTA EN CÁMARAS DE SEGURIDAD IP - IA Y ALARMAS
+              </p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Fecha de Obtención del Certificado:</p>
+              <p class="text-sm text-gray-600 mt-0.5">24/11/2023</p>
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-bold text-gray-800">Código autorizado por MINEDU :</p>
+              <p class="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight mt-1">
+                C001-048815
+              </p>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Verification stamp footnote -->
+      <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3 text-xs text-gray-500">
+        <span class="flex items-center">
+          <i class="fa-solid fa-shield-halved text-emerald-600 mr-2 text-sm"></i>
+          Registro oficial de acreditación educativa verificado en plataforma.
+        </span>
+        <span class="inline-flex items-center text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded">
+          <i class="fa-solid fa-check-circle mr-1.5"></i> Válido y Certificado
+        </span>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal for QR Generation & Verification -->
+  <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-gray-800 flex items-center">
+          <i class="fa-solid fa-qrcode mr-2 text-emerald-600"></i> Código QR de Verificación
+        </h3>
+        <button onclick="closeQrModal()" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+      </div>
+
+      <p class="text-xs text-gray-500 mb-4">
+        Escanea este código con tu celular para abrir directamente esta página de verificación oficial.
+      </p>
+
+      <!-- QR Display Box -->
+      <div class="flex justify-center items-center p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4 min-h-[200px]">
+        <div id="qrcodeCanvas"></div>
+      </div>
+
+      <div class="bg-gray-100 p-2.5 rounded text-[11px] text-gray-600 break-all mb-4" id="qrUrlDisplay">
+        Cargando URL...
+      </div>
+
+      <div class="flex gap-2">
+        <button 
+          onclick="copyUrlToClipboard()" 
+          class="flex-1 py-2 px-3 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-semibold rounded transition">
+          <i class="fa-regular fa-copy mr-1"></i> Copiar URL
+        </button>
+        <button 
+          onclick="closeQrModal()" 
+          class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-gray-200 mt-12 py-6 text-center text-xs text-gray-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>&copy; 2026 GEG CORPORATION. Todos los derechos reservados.</p>
+      <p class="text-gray-400">Sistema de consulta pública de certificados MINEDU</p>
+    </div>
+  </footer>
+
+  <script>
+    // Responsive hamburger menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
+    // Handle Search simulation and update
+    function handleSearch() {
+      const docVal = document.getElementById('docInput').value.trim();
+      const userDocDisplay = document.getElementById('userDocDisplay');
+      const resultsSection = document.getElementById('resultsSection');
+
+      if (!docVal) return;
+
+      resultsSection.classList.add('opacity-40');
+      setTimeout(() => {
+        userDocDisplay.textContent = docVal;
+        resultsSection.classList.remove('opacity-40');
+      }, 200);
+    }
+
+    // QR Code generation logic
+    let qrInstance = null;
+
+    function openQrModal() {
+      const modal = document.getElementById('qrModal');
+      const container = document.getElementById('qrcodeCanvas');
+      const qrUrlDisplay = document.getElementById('qrUrlDisplay');
+
+      // Build target URL (preserves current URL with ?dni= param for direct access)
+      const currentUrl = new URL(window.location.href);
+      const dni = document.getElementById('docInput').value.trim() || '46204949';
+      currentUrl.searchParams.set('dni', dni);
+      const targetUrl = currentUrl.toString();
+
+      qrUrlDisplay.textContent = targetUrl;
+      container.innerHTML = '';
+
+      try {
+        qrInstance = new QRCode(container, {
+          text: targetUrl,
+          width: 180,
+          height: 180,
+          colorDark: "#111827",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (err) {
+        container.innerHTML = '<span class="text-xs text-gray-400">Error al renderizar QR</span>';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeQrModal() {
+      const modal = document.getElementById('qrModal');
+      modal.classList.add('hidden');
+    }
+
+    function copyUrlToClipboard() {
+      const qrUrlDisplay = document.getElementById('qrUrlDisplay');
+      const tempInput = document.createElement('input');
+      tempInput.value = qrUrlDisplay.textContent;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      const copyBtn = event.currentTarget;
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<i class="fa-solid fa-check text-green-600 mr-1"></i> ¡Copiado!';
+      setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+      }, 1800);
+    }
+
+    // Auto-load DNI from URL query parameters (e.g. yoursite.com/?dni=46204949)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const dniParam = params.get('dni') || params.get('doc');
+      if (dniParam) {
+        const docInput = document.getElementById('docInput');
+        if (docInput) {
+          docInput.value = dniParam;
+          handleSearch();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
